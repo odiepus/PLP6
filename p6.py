@@ -1,28 +1,34 @@
+#Program 6 by Hector Herrera kec296 UTSA
+
+
 import re
 import sys
-
-str = "( / ( + 3 5 )  ) "
-
+#Used to keep track of parenthesis in our lines
 global leftParenCounter
 leftParenCounter = 0
 global rightParenCounter
 rightParenCounter = 0
-global new_list
-new_list = []
 
+# _____Exception Classes______ #
+# Used to throw exceptions
+# Depending on where the exception is thrown, the 'except' block will
+# contain specific output to notify user of error
 
+# Error class to use for user-defined exceptions
 class Error(Exception):
     pass
 
 
+# User-defined exception for function errors not covered by PrefixSyntax exception class
 class FunctionError(Error):
     pass
 
-
+# User-defined exception class to notify user of improper input format
 class PrefixSyntax(Error):
     pass
 
-
+# Function used to eval an operation on its two operands.
+# Series of if statements are used since there in no switch equivalent in python
 def prefixEval(op, op1, op2):
     if op is "+":
         return int(op1) + int(op2)
@@ -37,20 +43,10 @@ def prefixEval(op, op1, op2):
             x = op1
         elif op1.isdigit():
             x = int(op1)
-        else:
-            try:
-                raise FunctionError
-            except FunctionError:
-                print("Operand is neither a boolean or integer: cannot eval &")
         if isinstance(op2, (bool)):
             y = op2
         elif op2.isdigit():
             y = int(op2)
-        else:
-            try:
-                raise FunctionError
-            except FunctionError:
-                print("Operand is neither a boolean or integer: cannot eval &")
         z = x & y
         return z
     elif op is "|":
@@ -58,20 +54,10 @@ def prefixEval(op, op1, op2):
             x = op1
         elif op1.isdigit():
             x = int(op1)
-        else:
-            try:
-                raise FunctionError
-            except FunctionError:
-                print("Operand is neither a boolean or integer: cannot eval &")
         if isinstance(op2, (bool)):
             y = op2
         elif op2.isdigit():
             y = int(op2)
-        else:
-            try:
-                raise FunctionError
-            except FunctionError:
-                print("Operand is neither a boolean or integer: cannot eval &")
         z = x | y
         return z
     elif op is ">":
@@ -79,12 +65,25 @@ def prefixEval(op, op1, op2):
     elif op is "<":
         return int(op1) < int(op2)
 
+# Function used to parse the input line and extract the operator and its two operands
+# It calls itself recursively using a for-loop. This my hacky way of using a switch in python
 
+# This is ugly!!!! More time would be required to modularize it since each if
+# statement has repeat code
+# In each if statement i check if I am at the start of an operation
+# If so, then count the parenthesis, remove the element and call this function passing in
+# the the modified list.
+# Next I look for correct operand, remove it from list, then look for operands.
+# Operands are found by calling this function with newly modified list.
+# When operands are found the function returns it and the element is removed from list.
+# With operator and operands found the prefixEval function is called and the result is returned
+# I continue to parse the list looking for closing parenthesis. When the list is empty
+# if the left parenthesis and the right parenthesis are equal then return the result
+# otherwise throw exception and move on to next input
 def parseTokList(tok_list):
     global answer
     global leftParenCounter
     global rightParenCounter
-
     for i in range(1):
         if tok_list[i] is "(":
             leftParenCounter += 1
@@ -120,6 +119,7 @@ def parseTokList(tok_list):
                     print("Extra operand")
                     return
             return prefixEval(op, op1, op2)
+
         elif tok_list[i] is "+":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
@@ -137,6 +137,7 @@ def parseTokList(tok_list):
                 if tok_list[i] is not "(":
                     tok_list.pop(0)
             return prefixEval(op, op1, op2)
+
         elif tok_list[i] is "*":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
@@ -154,6 +155,7 @@ def parseTokList(tok_list):
                 if tok_list[i] is not "(":
                     tok_list.pop(0)
             return prefixEval(op, op1, op2)
+
         elif tok_list[i] is "/":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
@@ -171,6 +173,7 @@ def parseTokList(tok_list):
                 if tok_list[i] is not "(":
                     tok_list.pop(0)
             return prefixEval(op, op1, op2)
+
         elif tok_list[i] is "&":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
@@ -188,6 +191,7 @@ def parseTokList(tok_list):
                 if tok_list[i] is not "(":
                     tok_list.pop(0)
             return prefixEval(op, op1, op2)
+
         elif tok_list[i] is "|":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
@@ -205,6 +209,7 @@ def parseTokList(tok_list):
                 if tok_list[i] is not "(":
                     tok_list.pop(0)
             return prefixEval(op, op1, op2)
+
         elif tok_list[i] is ">":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
@@ -222,6 +227,7 @@ def parseTokList(tok_list):
                 if tok_list[i] is not "(":
                     tok_list.pop(0)
             return prefixEval(op, op1, op2)
+
         elif tok_list[i] is "<":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
@@ -239,8 +245,10 @@ def parseTokList(tok_list):
                 if tok_list[i] is not "(":
                     tok_list.pop(0)
             return prefixEval(op, op1, op2)
+
         elif tok_list[i].isdigit():
             return tok_list[i]
+
         elif len(tok_list) != 0:
             if tok_list[i] is ")":
                 rightParenCounter += 1
@@ -263,6 +271,8 @@ def parseTokList(tok_list):
                     print("Invalid operand")
                     return
 
+# Function used to remove or insert spaces, catch non-ints, look out for format errors and send
+# a clean list to parseTokList() for operations
 def prefixReader(str):
     temp_str = str.replace(" ", "")
     bad_start = re.search(r"^\(", temp_str)
@@ -319,13 +329,8 @@ def prefixReader(str):
         result = parseTokList(new_str)
         print(">", result)
 
-
-# try:
-#  prefixReader(str)
-# except FunctionError:
-#  print("Function prefixReader() threw an exception")
-
-
+# Function uses Professor Clark's user-input algorithm from Lecture03
+# For each input line prefixReader() is called with each line passed into the function
 def start():
     lines = []
     print("#args=", len(sys.argv))
@@ -349,4 +354,5 @@ def start():
         except FunctionError:
             print("Function prefixReader() threw an exception")
 
+# start the program loop
 start()
