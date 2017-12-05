@@ -1,0 +1,36 @@
+#args= 2
+> ( * 2 15 ) 
+> 30
+> ( +  ( * 12 4 ) ( * 2 3  )  ) 
+> 54
+> ( -  ( * 12 2 ) ( * 2 3  )  ) 
+> 18
+> ( * 5 ( / 5 2 )  ) 
+> 10
+> ( | ( > 6 13 )  ( < 15 2 )  ) 
+> False
+> ( & ( > 13 6 )  ( > 17 3 )  ) 
+> True
+> ( | ( & ( > 13 25 )  ( < 6 5 )  )  ( & ( > 14 2 )  ( < 31 65 )  )  ) 
+> True
+> ( +  1 ( * 12 4 ) ( weird 3 2 )  ) 
+Operands must be of type int
+Operators must be [ + - * / and/& or/| > <]
+> ( +  1 ( * 12 4  ) ( * 2 2 ) 
+Invalid operand
+> None
+> ( / ( + 3 5 )  ) 
+Missing operand
+Missing ending parenthesis
+> None
+> ( + ( - 4 2 3 )  8 )  ) 
+Too many operands
+> ( * ( + 3 X )  5 ) 
+Operands must be of type int
+Operators must be [ + - * / and/& or/| > <]
+Must use parenthesis
+> ( +  1 * 12 4 ) ( * 3 2 )  ) 
+Missing parenthesis
+> ( +  1 ( * 12 4 ) ( * 2 3  )  ) 
+Invalid operand
+> None
