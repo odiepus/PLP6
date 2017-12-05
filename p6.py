@@ -1,7 +1,7 @@
 import re
 import sys
 
-str = "(or (> 6 13) (< 15 2))"
+str = "(+ (- 4 2 3 3) 8))"
 
 global leftParenCounter
 leftParenCounter = 0
@@ -63,7 +63,7 @@ def prefixEval(op, op1, op2):
     elif op is "/":
         return int(op1) / int(op2)
     elif op is "&":
-        if not op1.isdigit():
+        if isinstance(op1, (bool)):
             x = op1
         elif op1.isdigit():
             x = int(op1)
@@ -72,8 +72,8 @@ def prefixEval(op, op1, op2):
                 raise FunctionError
             except FunctionError:
                 print("Operand is neither a boolean or integer: cannot eval &")
-        if not op2.isdigit():
-            x = op2
+        if isinstance(op2, (bool)):
+            y = op2
         elif op2.isdigit():
             y = int(op2)
         else:
@@ -84,7 +84,7 @@ def prefixEval(op, op1, op2):
         z = x & y
         return z
     elif op is "|":
-        if not op1.isdigit():
+        if isinstance(op1, (bool)):
             x = op1
         elif op1.isdigit():
             x = int(op1)
@@ -93,8 +93,8 @@ def prefixEval(op, op1, op2):
                 raise FunctionError
             except FunctionError:
                 print("Operand is neither a boolean or integer: cannot eval &")
-        if not op2.isdigit():
-            x = op2
+        if isinstance(op2, (bool)):
+            y = op2
         elif op2.isdigit():
             y = int(op2)
         else:
@@ -130,75 +130,151 @@ def parseTokList(tok_list):
         if tok_list[i] is "-":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
-            if tok_list[i] is not "(":
-                tok_list.pop(0)
+            if tok_list[i] is not ")":
+                if tok_list[i] is not "(":
+                    tok_list.pop(0)
+            if tok_list[i] is ")":
+                try:
+                    raise PrefixSyntax
+                except PrefixSyntax:
+                    print("Missing operand")
+                    return
             op2 = parseTokList(tok_list)
             if tok_list[i] is not ")":
-                tok_list.pop(0)
+                if tok_list[i] is not "(":
+                    tok_list.pop(0)
+            if tok_list[i].isdigit():
+                try:
+                    raise PrefixSyntax
+                except PrefixSyntax:
+                    print("Extra operand")
+                    break
             return prefixEval(op, op1, op2)
         elif tok_list[i] is "+":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
-            if tok_list[i] is not "(":
-                tok_list.pop(0)
+            if tok_list[i] is not ")":
+                if tok_list[i] is not "(":
+                    tok_list.pop(0)
+            if tok_list[i] is ")":
+                try:
+                    raise PrefixSyntax
+                except PrefixSyntax:
+                    print("Missing operand")
+                    return
             op2 = parseTokList(tok_list)
             if tok_list[i] is not ")":
-                tok_list.pop(0)
+                if tok_list[i] is not "(":
+                    tok_list.pop(0)
             return prefixEval(op, op1, op2)
         elif tok_list[i] is "*":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
-            if tok_list[i] is not "(":
-                tok_list.pop(0)
+            if tok_list[i] is not ")":
+                if tok_list[i] is not "(":
+                    tok_list.pop(0)
+            if tok_list[i] is ")":
+                try:
+                    raise PrefixSyntax
+                except PrefixSyntax:
+                    print("Missing operand")
+                    return
             op2 = parseTokList(tok_list)
             if tok_list[i] is not ")":
-                tok_list.pop(0)
+                if tok_list[i] is not "(":
+                    tok_list.pop(0)
             return prefixEval(op, op1, op2)
         elif tok_list[i] is "/":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
-            if tok_list[i] is not "(":
-                tok_list.pop(0)
+            if tok_list[i] is not ")":
+                if tok_list[i] is not "(":
+                    tok_list.pop(0)
+            if tok_list[i] is ")":
+                try:
+                    raise PrefixSyntax
+                except PrefixSyntax:
+                    print("Missing operand")
+                    return
             op2 = parseTokList(tok_list)
             if tok_list[i] is not ")":
-                tok_list.pop(0)
+                if tok_list[i] is not "(":
+                    tok_list.pop(0)
             return prefixEval(op, op1, op2)
         elif tok_list[i] is "&":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
-            if tok_list[i] is not "(":
-                tok_list.pop(0)
+            if tok_list[i] is not ")":
+                if tok_list[i] is not "(":
+                    tok_list.pop(0)
+            if tok_list[i] is ")":
+                try:
+                    raise PrefixSyntax
+                except PrefixSyntax:
+                    print("Missing operand")
+                    return
             op2 = parseTokList(tok_list)
             if tok_list[i] is not ")":
-                tok_list.pop(0)
+                if tok_list[i] is not "(":
+                    tok_list.pop(0)
             return prefixEval(op, op1, op2)
         elif tok_list[i] is "|":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
-            if tok_list[i] is not "(":
-                tok_list.pop(0)
+            if tok_list[i] is not ")":
+                if tok_list[i] is not "(":
+                    tok_list.pop(0)
+            if tok_list[i] is ")":
+                try:
+                    raise PrefixSyntax
+                except PrefixSyntax:
+                    print("Missing operand")
+                    return
             op2 = parseTokList(tok_list)
             if tok_list[i] is not ")":
-                tok_list.pop(0)
+                if tok_list[i] is not "(":
+                    tok_list.pop(0)
             return prefixEval(op, op1, op2)
         elif tok_list[i] is ">":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
-            if tok_list[i] is not "(":
-                tok_list.pop(0)
+            if tok_list[i] is not ")":
+                if tok_list[i] is not "(":
+                    tok_list.pop(0)
+            if tok_list[i] is ")":
+                try:
+                    raise PrefixSyntax
+                except PrefixSyntax:
+                    print("Missing operand")
+                    return
             op2 = parseTokList(tok_list)
             if tok_list[i] is not ")":
-                tok_list.pop(0)
+                if tok_list[i] is not "(":
+                    tok_list.pop(0)
             return prefixEval(op, op1, op2)
         elif tok_list[i] is "<":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
-            if tok_list[i] is not "(":
-                tok_list.pop(0)
+            if tok_list[i] is not ")":
+                if tok_list[i] is not "(":
+                    tok_list.pop(0)
+            if tok_list[i] is ")":
+                try:
+                    raise PrefixSyntax
+                except PrefixSyntax:
+                    print("Missing operand")
+                    return
             op2 = parseTokList(tok_list)
             if tok_list[i] is not ")":
-                tok_list.pop(0)
+                if tok_list[i] is not "(":
+                    tok_list.pop(0)
             return prefixEval(op, op1, op2)
+        elif tok_list[i].isalpha():
+            try:
+                raise PrefixSyntax
+            except PrefixSyntax:
+                print("An operator consists of non-boolean string")
+
         elif tok_list[i].isdigit():
             return tok_list[i]
         elif len(tok_list) != 0:
@@ -216,7 +292,11 @@ def parseTokList(tok_list):
                             print("Missing ending parenthesis")
                 elif len(tok_list) is not 0:
                     return answer
-
+            else:
+                try:
+                    raise PrefixSyntax
+                except PrefixSyntax:
+                    print("Invalid operand")
 
 def prefixReader(str):
     print(">", str)
@@ -227,6 +307,7 @@ def prefixReader(str):
             raise PrefixSyntax
         except PrefixSyntax:
             print("Expect operator after each left parenthesis")
+            return
     else:
         new_str = str
         new_str = re.sub("or", "|", new_str, 0)
@@ -235,6 +316,21 @@ def prefixReader(str):
         new_str = re.sub(r'\)', ') ', new_str)
         new_str = re.sub(r'\)', ' )', new_str)
         new_str = re.sub(r'\(', '( ', new_str)
+        print(new_str)
+        check_str = re.findall(r'\(.\s\d+\s\d+\s(\d+)+\)', new_str)
+        if check_str != None:
+            try:
+                raise PrefixSyntax
+            except PrefixSyntax:
+                print("Too many operands")
+                return
+        check_str = re.findall(r'[^-+\/|&><]\s\d+\s\d+\)', new_str)
+        if check_str != None:
+            try:
+                raise PrefixSyntax
+            except PrefixSyntax:
+                print("Too many operands")
+                return
         new_str = new_str.split()
         result = parseTokList(new_str)
         print(">", result)
