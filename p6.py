@@ -1,5 +1,5 @@
 import re
-str = "( +  3 3)"
+str = "( or  (+ 55 977) 71)"
 
 global leftParenCounter
 leftParenCounter = 0
@@ -20,11 +20,27 @@ class OperandError(Error):
 
 
 def tokenize_str(input_str):
-    new_str = input_str.replace(" ", "")
-    new_str = new_str.replace("or", "|")
-    new_str = new_str.replace("and", "&")
-    temp_tok = re.findall(r"([^.])|[.]", new_str)
-    return temp_tok
+    new_str = input_str
+    new_str = re.sub("or", "|", new_str, 0)
+    new_str = re.sub("and", "&", new_str, 0)
+    new_str = new_str.split()
+    print(new_str)
+
+    size = len(new_str)
+    for i in range(1):
+        if len(new_str[0]) > 1:
+            if "(" is new_str[0][0]:
+                k = new_str[0][0]
+                m = new_str[0][1]
+                new_list = {k, m}
+                return new_list
+            if new_str[0].isdigit():
+                temp_list = []
+                temp_list.append(new_str[0][:-1])
+
+
+    return new_str
+
 
 
 def prefixEval(op, op1, op2):
@@ -39,23 +55,25 @@ def prefixEval(op, op1, op2):
     elif op is "&":
         x = int(op1)
         y = int(op2)
-        return x & y
+        z = x & y
+        return z
     elif op is "|":
         x = int(op1)
         y = int(op2)
-        return x | y
+        z = x | y
+        return z
     elif op is ">":
         return int(op1) > int(op2)
     elif op is "<":
         return int(op1) < int(op2)
 
 
-
 def parseTokList(tok_list):
     global answer
     global leftParenCounter
     global rightParenCounter
-    for i in range(len(tok_list)):
+
+    for i in range(1):
         if tok_list[i] is "(":
             leftParenCounter += 1
             tok_list.pop(0)
@@ -66,7 +84,7 @@ def parseTokList(tok_list):
             tok_list.pop(0)
             op2 = parseTokList(tok_list)
             tok_list.pop(0)
-            prefixEval(op, op1, op2)
+            return prefixEval(op, op1, op2)
         elif tok_list[i] is "+":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
@@ -107,14 +125,15 @@ def parseTokList(tok_list):
         else:
             if tok_list[i] is ")":
                 rightParenCounter += 1
-                tok_list.pop(0)
-    if leftParenCounter == rightParanCounter:
+                return answer
+    if leftParenCounter == rightParenCounter:
         return answer
+
 
 def prefixReader(str):
     print(">", str)
-    str = str.replace(" ", "")
-    parens = re.search(r"\(\(", str)
+    temp_str = str.replace(" ", "")
+    parens = re.search(r"\(\(", temp_str)
     if parens is not None:
         try:
             raise OperandError
@@ -123,8 +142,7 @@ def prefixReader(str):
     else:
         tok_list = tokenize_str(str)
         result = parseTokList(tok_list)
-        print(result)
-        print(3 | 4)
+        print(">", result)
 
 
 prefixReader(str)
