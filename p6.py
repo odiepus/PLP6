@@ -1,7 +1,7 @@
 import re
 import sys
 
-str = "(+ (- 4 2 3) 8))"
+str = "( / ( + 3 5 )  ) "
 
 global leftParenCounter
 leftParenCounter = 0
@@ -21,36 +21,6 @@ class FunctionError(Error):
 
 class PrefixSyntax(Error):
     pass
-
-
-def tokenize_str(new_str):
-    global new_list
-    for i in range(1):
-        if len(new_str) == 0:
-            return new_list
-        if len(new_str[0]) == 1:
-            new_list.append(new_str.pop(0))
-            tokenize_str(new_str)
-            if len(new_str) == 0:
-                return new_list
-        if len(new_str[0]) > 1:
-            if len(new_str) == 0:
-                return new_list
-            if "(" is new_str[0][0]:
-                temp_str = new_str[0]
-                new_str.pop(0)
-                new_list.append(temp_str[0])
-                new_list.append(temp_str[1:])
-                tokenize_str(new_str)
-                if len(new_str) == 0:
-                    return new_list
-            else:
-                if len(new_str) == 0:
-                    return new_list
-                new_list.append(new_str.pop(0))
-                tokenize_str(new_str)
-                if len(new_str) == 0:
-                    return new_list
 
 
 def prefixEval(op, op1, op2):
@@ -148,7 +118,7 @@ def parseTokList(tok_list):
                     raise PrefixSyntax
                 except PrefixSyntax:
                     print("Extra operand")
-                    break
+                    return
             return prefixEval(op, op1, op2)
         elif tok_list[i] is "+":
             op = tok_list.pop(0)
@@ -269,12 +239,6 @@ def parseTokList(tok_list):
                 if tok_list[i] is not "(":
                     tok_list.pop(0)
             return prefixEval(op, op1, op2)
-        elif tok_list[i].isalpha():
-            try:
-                raise PrefixSyntax
-            except PrefixSyntax:
-                print("An operator consists of non-boolean string")
-
         elif tok_list[i].isdigit():
             return tok_list[i]
         elif len(tok_list) != 0:
@@ -297,9 +261,9 @@ def parseTokList(tok_list):
                     raise PrefixSyntax
                 except PrefixSyntax:
                     print("Invalid operand")
+                    return
 
 def prefixReader(str):
-    print(">", str)
     temp_str = str.replace(" ", "")
     bad_start = re.search(r"^\(", temp_str)
     parens = re.search(r"\(\(", temp_str)
@@ -319,11 +283,10 @@ def prefixReader(str):
         new_str = str
         new_str = re.sub("or", "|", new_str, 0)
         new_str = re.sub("and", "&", new_str, 0)
-        #new_str = re.sub(r'\)\(', ') (', new_str, 0)
         new_str = re.sub(r'\)', ') ', new_str)
         new_str = re.sub(r'\)', ' )', new_str)
         new_str = re.sub(r'\(', '( ', new_str)
-        print(new_str)
+        print(">", new_str)
         another_check = re.findall(r'(\s\d+){3,}\s\)', new_str)
         if len(another_check) is not 0:
             try:
@@ -331,14 +294,28 @@ def prefixReader(str):
             except PrefixSyntax:
                 print("Too many operands")
                 return
-        another_check_1 = re.findall(r'[+-]((\s\d+){1})\s\)', new_str)
+        another_check_1 = re.findall(r'[+-]\s\d+\s\)', new_str)
         if len(another_check_1) is not 0:
             try:
                 raise PrefixSyntax
             except PrefixSyntax:
-                print("Too many operands")
+                print("Too few operands")
+                return
+        another_check_2 = re.findall(r'\d+\s[+*/&|><-]\s\d+', new_str)
+        if len(another_check_2) is not 0:
+            try:
+                raise PrefixSyntax
+            except PrefixSyntax:
+                print("Missing parenthesis")
                 return
         new_str = new_str.split()
+        for i in new_str:
+            if i.isalpha():
+                try:
+                    raise PrefixSyntax
+                except PrefixSyntax:
+                    print("Operands must be of type int\nOperators must be [ + - * / and/& or/| > <]")
+                    return
         result = parseTokList(new_str)
         print(">", result)
 
@@ -362,7 +339,6 @@ def start():
         if inputLine == "":
             break
         inputLine = inputLine.rstrip('\n')  # remove the newline
-        print(inputLine)
         lines.append(inputLine)
 
     file.close()
