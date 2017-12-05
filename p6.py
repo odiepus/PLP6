@@ -1,8 +1,10 @@
 import re
-str = "( or (+ 3 2) ( - 6 3))"
+str = "( + (+ 3 2) (- 7 3))"
 
 global lastLeftParen
-lastLeftParen = False
+lastLeftParen = 0
+global lastRightParen
+lastRightParen = 0
 
 
 class Error(Exception):
@@ -18,6 +20,8 @@ class OperandError(Error):
 
 def tokenize_str(input_str):
     new_str = input_str.replace(" ", "")
+    new_str = new_str.replace("or", "|")
+    new_str = new_str.replace("and", "&")
     temp_tok = re.findall(r"([^.])|[.]", new_str)
     return temp_tok
 
@@ -31,10 +35,14 @@ def prefixEval(op, op1, op2):
         return int(op1) * int(op2)
     elif op is "/":
         return int(op1) / int(op2)
-    elif op is "and":
-        return int(op1) & int(op2)
-    elif op is "or":
-        return int(op1) | int(op2)
+    elif op is "&":
+        x = int(op1)
+        y = int(op2)
+        return x & y
+    elif op is "|":
+        x = int(op1)
+        y = int(op2)
+        return x | y
     elif op is ">":
         return int(op1) > int(op2)
     elif op is "<":
@@ -45,11 +53,13 @@ def prefixEval(op, op1, op2):
 def parseTokList(tok_list):
     global answer
     global lastLeftParen
+    global lastRightParen
     for i in tok_list:
         if i is "(":
-            lastLeftParen = tok_list.pop(0)
-            return parseTokList(tok_list)
-        if i is "-":
+            lastLeftParen += 1
+            tok_list.pop(0)
+            answer = parseTokList(tok_list)
+        elif i is "-":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
             tok_list.pop(0)
@@ -76,19 +86,27 @@ def parseTokList(tok_list):
             tok_list.pop(0)
             op2 = parseTokList(tok_list)
             tok_list.pop(0)
-            answer = prefixEval(op, op1, op2)
-        elif i is "and":
+            return prefixEval(op, op1, op2)
+        elif i is "&":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
             tok_list.pop(0)
             op2 = parseTokList(tok_list)
             tok_list.pop(0)
-            answer = prefixEval(op, op1, op2)
+            return prefixEval(op, op1, op2)
+        elif i is "|":
+            op = tok_list.pop(0)
+            op1 = parseTokList(tok_list)
+            tok_list.pop(0)
+            op2 = parseTokList(tok_list)
+            tok_list.pop(0)
+            return prefixEval(op, op1, op2)
         elif i.isdigit():
             return i
         elif i is ")":
-            return answer
-
+            lastRightParen += 1
+            tok_list.pop(0)
+    return answer
 
 def prefixReader(str):
     print(">", str)
@@ -103,6 +121,7 @@ def prefixReader(str):
         tok_list = tokenize_str(str)
         result = parseTokList(tok_list)
         print(result)
+        print(3 | 4)
 
 
 prefixReader(str)
