@@ -1,7 +1,7 @@
 import re
 import sys
 
-str = "(+ (- 4 2 3 3) 8))"
+str = "(+ (- 4 2 3) 8))"
 
 global leftParenCounter
 leftParenCounter = 0
@@ -301,8 +301,15 @@ def parseTokList(tok_list):
 def prefixReader(str):
     print(">", str)
     temp_str = str.replace(" ", "")
+    bad_start = re.search(r"^\(", temp_str)
     parens = re.search(r"\(\(", temp_str)
-    if parens is not None:
+    if bad_start is None:
+        try:
+            raise PrefixSyntax
+        except PrefixSyntax:
+            print("Must use parenthesis")
+            return
+    elif parens is not None:
         try:
             raise PrefixSyntax
         except PrefixSyntax:
@@ -312,20 +319,20 @@ def prefixReader(str):
         new_str = str
         new_str = re.sub("or", "|", new_str, 0)
         new_str = re.sub("and", "&", new_str, 0)
-        new_str = re.sub(r'\)\(', ') (', new_str, 0)
+        #new_str = re.sub(r'\)\(', ') (', new_str, 0)
         new_str = re.sub(r'\)', ') ', new_str)
         new_str = re.sub(r'\)', ' )', new_str)
         new_str = re.sub(r'\(', '( ', new_str)
         print(new_str)
-        check_str = re.findall(r'\(.\s\d+\s\d+\s(\d+)+\)', new_str)
-        if check_str != None:
+        another_check = re.findall(r'(\s\d+){3,}\s\)', new_str)
+        if len(another_check) is not 0:
             try:
                 raise PrefixSyntax
             except PrefixSyntax:
                 print("Too many operands")
                 return
-        check_str = re.findall(r'[^-+\/|&><]\s\d+\s\d+\)', new_str)
-        if check_str != None:
+        another_check_1 = re.findall(r'[+-]((\s\d+){1})\s\)', new_str)
+        if len(another_check_1) is not 0:
             try:
                 raise PrefixSyntax
             except PrefixSyntax:
@@ -362,7 +369,7 @@ def start():
 
     for i in lines:
         try:
-            prefixReader(str)
+            prefixReader(i)
         except FunctionError:
             print("Function prefixReader() threw an exception")
 
