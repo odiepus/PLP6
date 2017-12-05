@@ -1,7 +1,7 @@
 import re
 import sys
 
-str = "(+ (- 5 3)(+ 3 9))"
+str = "(or (> 6 13) (< 15 2))"
 
 global leftParenCounter
 leftParenCounter = 0
@@ -34,10 +34,6 @@ def tokenize_str(new_str):
             if len(new_str) == 0:
                 return new_list
         if len(new_str[0]) > 1:
-            query_re = re.compile(r"\)\s")
-            match_obj = query_re.search(new_str[0])
-            another_re = re.compile(r'\)\(')
-            another_match = another_re.search(new_str[0])
             if len(new_str) == 0:
                 return new_list
             if "(" is new_str[0][0]:
@@ -48,27 +44,6 @@ def tokenize_str(new_str):
                 tokenize_str(new_str)
                 if len(new_str) == 0:
                     return new_list
-            if match_obj is not None:
-                    temp_str = new_str[0]
-                    new_str.pop(0)
-                    new_list.append(temp_str[:-1])
-                    new_list.append(temp_str[-1])
-                    tokenize_str(new_str)
-                    if len(new_str) == 0:
-                        return new_list
-            if another_match is not None:
-                temp_str = new_str[0]
-                new_str.pop(0)
-                temp_str = temp_str.replace(")(", ") (", 1)
-                temp_list = temp_str.split()
-                new_list.append(temp_list[0][:-1])
-                new_list.append(temp_list[0][-1])
-                new_list.append(temp_list[1][:-1])
-                new_list.append(temp_list[1][-1])
-                tokenize_str(new_str)
-                if len(new_str) == 0:
-                    return new_list
-
             else:
                 if len(new_str) == 0:
                     return new_list
@@ -88,13 +63,45 @@ def prefixEval(op, op1, op2):
     elif op is "/":
         return int(op1) / int(op2)
     elif op is "&":
-        x = int(op1)
-        y = int(op2)
+        if not op1.isdigit():
+            x = op1
+        elif op1.isdigit():
+            x = int(op1)
+        else:
+            try:
+                raise FunctionError
+            except FunctionError:
+                print("Operand is neither a boolean or integer: cannot eval &")
+        if not op2.isdigit():
+            x = op2
+        elif op2.isdigit():
+            y = int(op2)
+        else:
+            try:
+                raise FunctionError
+            except FunctionError:
+                print("Operand is neither a boolean or integer: cannot eval &")
         z = x & y
         return z
     elif op is "|":
-        x = int(op1)
-        y = int(op2)
+        if not op1.isdigit():
+            x = op1
+        elif op1.isdigit():
+            x = int(op1)
+        else:
+            try:
+                raise FunctionError
+            except FunctionError:
+                print("Operand is neither a boolean or integer: cannot eval &")
+        if not op2.isdigit():
+            x = op2
+        elif op2.isdigit():
+            y = int(op2)
+        else:
+            try:
+                raise FunctionError
+            except FunctionError:
+                print("Operand is neither a boolean or integer: cannot eval &")
         z = x | y
         return z
     elif op is ">":
@@ -113,54 +120,84 @@ def parseTokList(tok_list):
             leftParenCounter += 1
             tok_list.pop(0)
             answer = parseTokList(tok_list)
+
             if len(tok_list) is 0:
                 try:
                     raise PrefixSyntax
                 except PrefixSyntax:
                     print("Missing ending parenthesis")
 
-
         if tok_list[i] is "-":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
-            tok_list.pop(0)
+            if tok_list[i] is not "(":
+                tok_list.pop(0)
             op2 = parseTokList(tok_list)
-            tok_list.pop(0)
+            if tok_list[i] is not ")":
+                tok_list.pop(0)
             return prefixEval(op, op1, op2)
         elif tok_list[i] is "+":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
-            tok_list.pop(0)
+            if tok_list[i] is not "(":
+                tok_list.pop(0)
             op2 = parseTokList(tok_list)
-            tok_list.pop(0)
+            if tok_list[i] is not ")":
+                tok_list.pop(0)
             return prefixEval(op, op1, op2)
         elif tok_list[i] is "*":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
-            tok_list.pop(0)
+            if tok_list[i] is not "(":
+                tok_list.pop(0)
             op2 = parseTokList(tok_list)
-            tok_list.pop(0)
+            if tok_list[i] is not ")":
+                tok_list.pop(0)
             return prefixEval(op, op1, op2)
         elif tok_list[i] is "/":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
-            tok_list.pop(0)
+            if tok_list[i] is not "(":
+                tok_list.pop(0)
             op2 = parseTokList(tok_list)
-            tok_list.pop(0)
+            if tok_list[i] is not ")":
+                tok_list.pop(0)
             return prefixEval(op, op1, op2)
         elif tok_list[i] is "&":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
-            tok_list.pop(0)
+            if tok_list[i] is not "(":
+                tok_list.pop(0)
             op2 = parseTokList(tok_list)
-            tok_list.pop(0)
+            if tok_list[i] is not ")":
+                tok_list.pop(0)
             return prefixEval(op, op1, op2)
         elif tok_list[i] is "|":
             op = tok_list.pop(0)
             op1 = parseTokList(tok_list)
-            tok_list.pop(0)
+            if tok_list[i] is not "(":
+                tok_list.pop(0)
             op2 = parseTokList(tok_list)
-            tok_list.pop(0)
+            if tok_list[i] is not ")":
+                tok_list.pop(0)
+            return prefixEval(op, op1, op2)
+        elif tok_list[i] is ">":
+            op = tok_list.pop(0)
+            op1 = parseTokList(tok_list)
+            if tok_list[i] is not "(":
+                tok_list.pop(0)
+            op2 = parseTokList(tok_list)
+            if tok_list[i] is not ")":
+                tok_list.pop(0)
+            return prefixEval(op, op1, op2)
+        elif tok_list[i] is "<":
+            op = tok_list.pop(0)
+            op1 = parseTokList(tok_list)
+            if tok_list[i] is not "(":
+                tok_list.pop(0)
+            op2 = parseTokList(tok_list)
+            if tok_list[i] is not ")":
+                tok_list.pop(0)
             return prefixEval(op, op1, op2)
         elif tok_list[i].isdigit():
             return tok_list[i]
@@ -168,6 +205,7 @@ def parseTokList(tok_list):
             if tok_list[i] is ")":
                 rightParenCounter += 1
                 tok_list.pop(0)
+
                 if len(tok_list) is 0:
                     if leftParenCounter == rightParenCounter:
                         return answer
@@ -176,15 +214,8 @@ def parseTokList(tok_list):
                             raise PrefixSyntax
                         except PrefixSyntax:
                             print("Missing ending parenthesis")
-
-    if leftParenCounter == rightParenCounter:
-        return answer
-    else:
-        try:
-            raise PrefixSyntax
-        except PrefixSyntax:
-            print("Missing parenthesis!!!\Check your parenthesis.")
-
+                elif len(tok_list) is not 0:
+                    return answer
 
 
 def prefixReader(str):
@@ -200,31 +231,43 @@ def prefixReader(str):
         new_str = str
         new_str = re.sub("or", "|", new_str, 0)
         new_str = re.sub("and", "&", new_str, 0)
+        new_str = re.sub(r'\)\(', ') (', new_str, 0)
+        new_str = re.sub(r'\)', ') ', new_str)
+        new_str = re.sub(r'\)', ' )', new_str)
+        new_str = re.sub(r'\(', '( ', new_str)
         new_str = new_str.split()
-        tok_list = tokenize_str(new_str)
-        result = parseTokList(tok_list)
+        result = parseTokList(new_str)
         print(">", result)
 
 
-prefixReader(str)
-# while True:
-#     print("#args=", len(sys.argv))
-#     if len(sys.argv) < 2:
-#         print("filename needed as command argument")
-#         sys.exit(1)
-#     file = open(sys.argv[1], "r")
-#     while True:
-#         inputLine = file.readline() # reads one text line from the file
-#         # check for no input (i.e., EOF)
-#         if inputLine == "":
-#             break
-#         inputLine = inputLine.rstrip('\n')  # remove the newline
-#         print(inputLine)
-#
-#         try:
-#             prefixReader(str)
-#         except FunctionError:
-#             print("Function prefixReader() threw an exception")
-#
-#
-#     file.close()
+# try:
+#  prefixReader(str)
+# except FunctionError:
+#  print("Function prefixReader() threw an exception")
+
+
+def start():
+    lines = []
+    print("#args=", len(sys.argv))
+    if len(sys.argv) < 2:
+        print("filename needed as command argument")
+        sys.exit(1)
+    file = open(sys.argv[1], "r")
+    while True:
+        inputLine = file.readline()  # reads one text line from the file
+        # check for no input (i.e., EOF)
+        if inputLine == "":
+            break
+        inputLine = inputLine.rstrip('\n')  # remove the newline
+        print(inputLine)
+        lines.append(inputLine)
+
+    file.close()
+
+    for i in lines:
+        try:
+            prefixReader(str)
+        except FunctionError:
+            print("Function prefixReader() threw an exception")
+
+start()
